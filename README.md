@@ -43,7 +43,7 @@ toggleBucket.set(!isActive)
 const Compo = () => {
   const isActive = toggleBucket.useValue()
   const toggle = () =>
-  toggleBucket.set(!isActive)
+    toggleBucket.set(!isActive)
 }
 ```
 
@@ -64,8 +64,8 @@ export const counterBucket = new Bucket<Counter>({
 // ... to get a single instance for each id
 export const counterBucketForId = (id: string) =>
   keyedBucket<Counter>({
-  defaultValue: { count: 0 },
-  persistKey: `my-bucket-${id}` // Optional
+    defaultValue: { count: 0 },
+    persistKey: `my-bucket-${id}` // Optional
   }, `bucket-${id}`)
 ```
 
@@ -93,8 +93,10 @@ class CounterBucket extends Bucket<Counter> {
     this.useSelector(state => state.count)
 
   // Modifiers
-  incrementCount = () => this.set(state => ({ ...state, count: state.count + 1 })
-  resetCount = () => this.set(0)
+  incrementCount = () =>
+    this.set(state => ({ ...state, count: state.count + 1 })
+  resetCount = () =>
+    this.set(0)
 }
 
 export const counterBucket = new CounterBucket({
@@ -151,7 +153,7 @@ Usage:
 const Compo = ({ id }: { id: string }) => {
   // With `useQuery` candy
   const { data: counter, loading, error, refetch } =
-  counterFetcherBucket(id).useQuery()
+    counterFetcherBucket(id).useQuery()
   
   // Without `useQuery`
   const refetch = counterFetcherBucket(id).useQueryTrigger()
@@ -188,14 +190,15 @@ Usage:
 ```ts
 const Compo = ({ id }: { id: string }) => {
   // With `useQuery` candy
+  // will not trigger mutator on mount for mutators
   const { data: response, loading, error, refetch } =
-  updateCounterMutatorBucket(id).useQuery() // will not trigger mutator on mount
+    updateCounterMutatorBucket(id).useQuery() 
 
   // Without `useQuery`
   updateCounter = async (newCount: number) => {
-  const { lastUpdatedAt } = await updateCounterMutatorBucket(id).mutate({
-  newCount
-  })
+    const { lastUpdatedAt } = await updateCounterMutatorBucket(id).mutate({
+      newCount
+    })
   }
 }
 ```
@@ -225,15 +228,15 @@ const countersPaginatedFetcherBucket = new PaginatedFetcherBucket<Counters>({
 // Keyed path
 const countersPaginatedFetcherBucket = (id: string) =>
   keyedPaginatedFetcherBucket<Counters>({
-  path: `/user/${id}/counters`, // used as "unique key"
-  limit: 20
+    path: `/user/${id}/counters`, // used as "unique key"
+    limit: 20
   })
 
 // Keyed Custom path
 const countersPaginatedFetcherBucket = (id: string) =>
   keyedPaginatedFetcherBucket<Counters>({
-  formatPath: (page: number, limit: number) =>
-  `/user/${id}/counters/?color=red&page=${page}&limit=${limit}`
+    formatPath: (page: number, limit: number) =>
+      `/user/${id}/counters/?color=red&page=${page}&limit=${limit}`
   }, `user-counters-${id}`)  // Must provide a "unique key" as "path" doesn't exist
 
 ```
@@ -244,7 +247,7 @@ Usage example
 const Compo = ({ id }: { id: string }) => {
   // With `useQuery` candy
   const { data: counters, loading, refetch, loadMore, loadingMore, hasReachedEnd } =
-  countersPaginatedFetcherBucket(id).useQuery()
+    countersPaginatedFetcherBucket(id).useQuery()
   
   // Without `useQuery`
   const refetchFirstPage = countersPaginatedFetcherBucket(id).useQueryTrigger()
