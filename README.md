@@ -1,6 +1,6 @@
-# Why
 
-The idea is to propose a set of entreprise-ready standards for the most common required tools for building an app, which are fetching data, storing it, persisting it, and get types for all of it)
+# Why
+The idea is to propose a set of entreprise-ready standards for the most common required tools for building an app: fetching data, storing it, persisting it, and get types for all of it
 
 - ✅ Compact, No boiler-plate
 - ✅ Easy-to-read, Merge Requests friendly
@@ -22,11 +22,11 @@ interface BucketConfig<T> {
 }
 
 interface Bucket<T> {
-	constructor (config: BucketConfig<T>)
-	get: () => T
-	set: (newValue: T) => void
-	useValue(): T
-	useSelector: <V>(state: T) => V
+  constructor (config: BucketConfig<T>)
+  get: () => T
+  set: (newValue: T) => void
+  useValue(): T
+  useSelector: <V>(state: T) => V
 }
 ```
 
@@ -41,9 +41,9 @@ toggleBucket.set(!isActive)
 
 // Listen to changes in components
 const Compo = () => {
-	const isActive = toggleBucket.useValue()
-	const toggle = () =>
-		toggleBucket.set(!isActive)
+  const isActive = toggleBucket.useValue()
+  const toggle = () =>
+  toggleBucket.set(!isActive)
 }
 ```
 
@@ -56,17 +56,17 @@ interface Counter {
 
 // A simple persisted bucket
 export const counterBucket = new Bucket<Counter>({
-	defaultValue: { count: 0 },
-	persistKey: 'counter-bucket'
+  defaultValue: { count: 0 },
+  persistKey: 'counter-bucket'
 })
 
 // Use the helpers `keyed*Bucket`
 // ... to get a single instance for each id
 export const counterBucketForId = (id: string) =>
-	keyedBucket<Counter>({
-		defaultValue: { count: 0 },
-		persistKey: `my-bucket-${id}` // Optional
-	}, `bucket-${id}`)
+  keyedBucket<Counter>({
+  defaultValue: { count: 0 },
+  persistKey: `my-bucket-${id}` // Optional
+  }, `bucket-${id}`)
 ```
 
 Now let's use our buckets 
@@ -98,7 +98,7 @@ class CounterBucket extends Bucket<Counter> {
 }
 
 export const counterBucket = new CounterBucket({
-	defaultValue: { count: 0 }
+  defaultValue: { count: 0 }
 })
 ```
 
@@ -129,35 +129,35 @@ interface FetcherBucketConfig<T> extends BucketConfig<T> {
 
 ```ts
 interface CounterResponse {
-	count: number
+  count: number
 }
 
 // Simple fetcher
 const counterFetcherBucket = new FetcherBucket<CounterResponse>({
-	path: `/users/counter`,
-	defaultValue: { count: 0 }
+  path: `/users/counter`,
+  defaultValue: { count: 0 }
 })
-	
+  
 // Keyed fetcher
 const counterFetcherBucket = (id: string) =>
-	keyedFetcherBucket<CounterResponse>({
-	     path: `/users/${id}/counter`,
-	     defaultValue: { count: 0 }
-	})
+  keyedFetcherBucket<CounterResponse>({
+    path: `/users/${id}/counter`,
+    defaultValue: { count: 0 }
+  })
 ```
-
 Usage: 
+
 ```ts
 const Compo = ({ id }: { id: string }) => {
-	// With `useQuery` candy
-	const { data: counter, loading, error, refetch } =
-		counterFetcherBucket(id).useQuery()
+  // With `useQuery` candy
+  const { data: counter, loading, error, refetch } =
+  counterFetcherBucket(id).useQuery()
   
-	// Without `useQuery`
-	const refetch = counterFetcherBucket(id).useQueryTrigger()
-	const fetched = counterFetcherBucket(id).useFetched()
-	const loading = counterFetcherBucket(id).useLoading()
-	const error = counterFetcherBucket(id).useError()
+  // Without `useQuery`
+  const refetch = counterFetcherBucket(id).useQueryTrigger()
+  const fetched = counterFetcherBucket(id).useFetched()
+  const loading = counterFetcherBucket(id).useLoading()
+  const error = counterFetcherBucket(id).useError()
 }
 ```
 
@@ -165,38 +165,38 @@ There are also "Mutators", the candy for POST fetchers
 
 ```ts
 interface UpdateCounterParams {
-	newCounter: number
+  newCounter: number
 }
 interface UpdateCounterResponse {
-	lastUpdatedAt: Date
+  lastUpdatedAt: Date
 }
 
 // Simple Mutator
 const updateCounterMutatorBucket = new MutatorBucket<UpdateCounterParams>({
-	path: `/users/counter`
+  path: `/users/counter`
 })
 
 // Keyed Mutator
 const updateCounterMutatorBucket = (id: string) =>
-	keyedMutatorBucket<UpdateCounterParams, UpdateCounterResponse>({
-	     path: `/users/${id}/counter`,
-	})
+  keyedMutatorBucket<UpdateCounterParams, UpdateCounterResponse>({
+       path: `/users/${id}/counter`,
+  })
 ```
 
-Usage: 
+Usage:
 
 ```ts
 const Compo = ({ id }: { id: string }) => {
-	// With `useQuery` candy
-	const { data: response, loading, error, refetch } =
-		updateCounterMutatorBucket(id).useQuery() // will not trigger mutator on mount
+  // With `useQuery` candy
+  const { data: response, loading, error, refetch } =
+  updateCounterMutatorBucket(id).useQuery() // will not trigger mutator on mount
 
-	// Without `useQuery`
-	updateCounter = async (newCount: number) => {
-		const { lastUpdatedAt } = await updateCounterMutatorBucket(id).mutate({
-			newCount
-		})
-	}
+  // Without `useQuery`
+  updateCounter = async (newCount: number) => {
+  const { lastUpdatedAt } = await updateCounterMutatorBucket(id).mutate({
+  newCount
+  })
+  }
 }
 ```
 
@@ -218,52 +218,51 @@ type Counters = Array<Counter>
 
 // Simple path
 const countersPaginatedFetcherBucket = new PaginatedFetcherBucket<Counters>({
-	path: `/user/counters`,
-	limit: 20
+  path: `/user/counters`,
+  limit: 20
 })
-	
+  
 // Keyed path
 const countersPaginatedFetcherBucket = (id: string) =>
-	keyedPaginatedFetcherBucket<Counters>({
-		path: `/user/${id}/counters`, // used as "unique key"
-		limit: 20
-	})
+  keyedPaginatedFetcherBucket<Counters>({
+  path: `/user/${id}/counters`, // used as "unique key"
+  limit: 20
+  })
 
 // Keyed Custom path
 const countersPaginatedFetcherBucket = (id: string) =>
-	keyedPaginatedFetcherBucket<Counters>({
-		formatPath: (page: number, limit: number) =>
-			`/user/${id}/counters/?color=red&page=${page}&limit=${limit}`
-	}, `user-counters-${id}`)  // Must provide a "unique key" as "path" doesn't exist
+  keyedPaginatedFetcherBucket<Counters>({
+  formatPath: (page: number, limit: number) =>
+  `/user/${id}/counters/?color=red&page=${page}&limit=${limit}`
+  }, `user-counters-${id}`)  // Must provide a "unique key" as "path" doesn't exist
 
 ```
-
 Usage example
 
 ```jsx
 
 const Compo = ({ id }: { id: string }) => {
-	// With `useQuery` candy
-	const { data: counters, loading, refetch, loadMore, loadingMore, hasReachedEnd } =
-		countersPaginatedFetcherBucket(id).useQuery()
-		
-	// Without `useQuery`
-	const refetchFirstPage = countersPaginatedFetcherBucket(id).useQueryTrigger()
-	const loadMore = countersPaginatedFetcherBucket(id).useLoadMore()
-	const loadingMore = countersPaginatedFetcherBucket(id).useLoadingMore()
-	...
-	
-	const  renderCounter  = (item:  Counter, index:  number) =>
-		<CounterItem  key={index}  counter={item}  />
-		
-	return (
-      <FlatList
-        ListFooterComponent={loadingMore ? <Text>Loading more...</Text> : null}
-        data={counters}
-        onRefresh={refetch}
-        onEndReached={loadMore}
-        renderItem={({ index, item }) => renderCounter(item, index)}
-      />
+  // With `useQuery` candy
+  const { data: counters, loading, refetch, loadMore, loadingMore, hasReachedEnd } =
+  countersPaginatedFetcherBucket(id).useQuery()
+  
+  // Without `useQuery`
+  const refetchFirstPage = countersPaginatedFetcherBucket(id).useQueryTrigger()
+  const loadMore = countersPaginatedFetcherBucket(id).useLoadMore()
+  const loadingMore = countersPaginatedFetcherBucket(id).useLoadingMore()
+  ...
+  
+  const  renderCounter  = (item:  Counter, index:  number) =>
+    <CounterItem  key={index}  counter={item}  />
+  
+  return (
+    <FlatList
+      ListFooterComponent={loadingMore ? <Text>Loading more...</Text> : null}
+      data={counters}
+      onRefresh={refetch}
+      onEndReached={loadMore}
+      renderItem={({ index, item }) => renderCounter(item, index)}
+    />
   )
 }
 ```
