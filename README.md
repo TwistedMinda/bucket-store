@@ -60,25 +60,24 @@ export const counterBucket = new Bucket<Counter>({
   persistKey: 'counter-bucket'
 })
 
-// Use the helpers `keyed*Bucket`
-// ... to get a single instance for each id
-export const counterBucketForId = (id: string) =>
-  keyedBucket<Counter>({
-    defaultValue: { count: 0 },
-    persistKey: `my-bucket-${id}` // Optional
-  }, `bucket-${id}`)
-```
-
-Now let's use our buckets 
-
-```ts
-// Use in components
+// Usage in components
 const Compo = ({ id }: { id: string }) => {
-  const value = counterBucketForId(id).useValue() // { count: 0 }
+  const value = counterBucket.useValue() // { count: 0 }
   
   const increment = () =>
     counterBucket.set(state => ({ ...state, count: state.count + 1 })
 }
+```
+
+Often times we need multiple instances of a bucket given parameters.
+Can use the helpers (here `keyedBucket`) to create a singleton for each id, or manually use `Bucket.singleton()`.
+
+```ts
+export const counterBucketForId = (id: string) =>
+  keyedBucket<Counter>({
+    defaultValue: { count: 0 },
+    ...
+  }, `bucket-${id}`)
 ```
 
 ## Custom
@@ -94,7 +93,7 @@ class CounterBucket extends Bucket<Counter> {
 
   // Modifiers
   incrementCount = () =>
-    this.set(state => ({ ...state, count: state.count + 1 })
+    this.set(state => ({ ...state, count: state.count + 1 }))
   resetCount = () =>
     this.set(0)
 }
@@ -102,11 +101,8 @@ class CounterBucket extends Bucket<Counter> {
 export const counterBucket = new CounterBucket({
   defaultValue: { count: 0 }
 })
-```
 
-Use your new bucket as any other: 
-
-```ts
+// Use in components as other buckets
 const Compo = ({ id }: { id: string }) => {
   const count = customBucket.useCount() // 0
   
@@ -115,6 +111,15 @@ const Compo = ({ id }: { id: string }) => {
   const reset = () =>
     customBucket.resetCount()
 }
+```
+
+There is no helper to create a singleton for your own buckets, so you must use `Bucket.singleton()`
+
+```ts
+export const counterBucketForId = (id: string) =>
+  Bucket.singleton(`bucket-${id}`, () => new CounterBucket({
+    defaultValue: { count: 0 },
+  }))
 ```
 
 ## Fetcher Buckets (Custom)
@@ -181,7 +186,7 @@ const updateCounterMutatorBucket = new MutatorBucket<UpdateCounterParams>({
 // Keyed Mutator
 const updateCounterMutatorBucket = (id: string) =>
   keyedMutatorBucket<UpdateCounterParams, UpdateCounterResponse>({
-       path: `/users/${id}/counter`,
+    path: `/users/${id}/counter`,
   })
 ```
 
