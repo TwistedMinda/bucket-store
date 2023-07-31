@@ -55,7 +55,7 @@ interface Counter {
 }
 
 // A simple persisted bucket
-export const counterBucket = new Bucket<Counter>({
+const counterBucket = new Bucket<Counter>({
   defaultValue: { count: 0 },
   persistKey: 'counter-bucket'
 })
@@ -73,7 +73,7 @@ Often times we need multiple instances of a bucket given parameters.
 Can use the helpers (here `keyedBucket`) to create a singleton for each id, or manually use `Bucket.singleton()`.
 
 ```ts
-export const counterBucketForId = (id: string) =>
+const counterBucket = (id: string) =>
   keyedBucket<Counter>({
     defaultValue: { count: 0 },
     ...
@@ -98,7 +98,7 @@ class CounterBucket extends Bucket<Counter> {
     this.set(0)
 }
 
-export const counterBucket = new CounterBucket({
+const counterBucket = new CounterBucket({
   defaultValue: { count: 0 }
 })
 
@@ -116,7 +116,7 @@ const Compo = ({ id }: { id: string }) => {
 There is no helper to create a singleton for your own buckets, so you must use `Bucket.singleton()`
 
 ```ts
-export const counterBucketForId = (id: string) =>
+const counterBucket = (id: string) =>
   Bucket.singleton(`bucket-${id}`, () => new CounterBucket({
     defaultValue: { count: 0 },
   }))
@@ -140,13 +140,13 @@ interface CounterResponse {
 }
 
 // Simple fetcher
-const counterFetcherBucket = new FetcherBucket<CounterResponse>({
+const counterBucket = new FetcherBucket<CounterResponse>({
   path: `/users/counter`,
   defaultValue: { count: 0 }
 })
   
 // Keyed fetcher
-const counterFetcherBucket = (id: string) =>
+const counterBucket = (id: string) =>
   keyedFetcherBucket<CounterResponse>({
     path: `/users/${id}/counter`,
     defaultValue: { count: 0 }
@@ -158,13 +158,13 @@ Usage:
 const Compo = ({ id }: { id: string }) => {
   // With `useQuery` candy
   const { data: counter, loading, error, refetch } =
-    counterFetcherBucket(id).useQuery()
+    counterBucket(id).useQuery()
   
   // Without `useQuery`
-  const refetch = counterFetcherBucket(id).useQueryTrigger()
-  const fetched = counterFetcherBucket(id).useFetched()
-  const loading = counterFetcherBucket(id).useLoading()
-  const error = counterFetcherBucket(id).useError()
+  const refetch = counterBucket(id).useQueryTrigger()
+  const fetched = counterBucket(id).useFetched()
+  const loading = counterBucket(id).useLoading()
+  const error = counterBucket(id).useError()
 }
 ```
 
@@ -179,12 +179,12 @@ interface UpdateCounterResponse {
 }
 
 // Simple Mutator
-const updateCounterMutatorBucket = new MutatorBucket<UpdateCounterParams>({
+const updateCounterBucket = new MutatorBucket<UpdateCounterParams>({
   path: `/users/counter`
 })
 
 // Keyed Mutator
-const updateCounterMutatorBucket = (id: string) =>
+const updateCounterBucket = (id: string) =>
   keyedMutatorBucket<UpdateCounterParams, UpdateCounterResponse>({
     path: `/users/${id}/counter`,
   })
@@ -197,11 +197,11 @@ const Compo = ({ id }: { id: string }) => {
   // With `useQuery` candy
   // will not trigger mutator on mount for mutators
   const { data: response, loading, error, refetch } =
-    updateCounterMutatorBucket(id).useQuery() 
+    updateCounterBucket(id).useQuery() 
 
   // Without `useQuery`
   updateCounter = async (newCount: number) => {
-    const { lastUpdatedAt } = await updateCounterMutatorBucket(id).mutate({
+    const { lastUpdatedAt } = await updateCounterBucket(id).mutate({
       newCount
     })
   }
@@ -225,20 +225,20 @@ interface PaginatedFetcherBucketConfig<T> extends FetcherBucketConfig<T> {
 type Counters = Array<Counter>
 
 // Simple path
-const countersPaginatedFetcherBucket = new PaginatedFetcherBucket<Counters>({
+const countersBucket = new PaginatedFetcherBucket<Counters>({
   path: `/user/counters`,
   limit: 20
 })
   
 // Keyed path
-const countersPaginatedFetcherBucket = (id: string) =>
+const countersBucket = (id: string) =>
   keyedPaginatedFetcherBucket<Counters>({
     path: `/user/${id}/counters`, // used as "unique key"
     limit: 20
   })
 
 // Keyed Custom path
-const countersPaginatedFetcherBucket = (id: string) =>
+const countersBucket = (id: string) =>
   keyedPaginatedFetcherBucket<Counters>({
     formatPath: (page: number, limit: number) =>
       `/user/${id}/counters/?color=red&page=${page}&limit=${limit}`
@@ -252,12 +252,12 @@ Usage example
 const Compo = ({ id }: { id: string }) => {
   // With `useQuery` candy
   const { data: counters, loading, refetch, loadMore, loadingMore, hasReachedEnd } =
-    countersPaginatedFetcherBucket(id).useQuery()
+    countersBucket(id).useQuery()
   
   // Without `useQuery`
-  const refetchFirstPage = countersPaginatedFetcherBucket(id).useQueryTrigger()
-  const loadMore = countersPaginatedFetcherBucket(id).useLoadMore()
-  const loadingMore = countersPaginatedFetcherBucket(id).useLoadingMore()
+  const refetchFirstPage = countersBucket(id).useQueryTrigger()
+  const loadMore = countersBucket(id).useLoadMore()
+  const loadingMore = countersBucket(id).useLoadingMore()
   ...
   
   const  renderCounter  = (item:  Counter, index:  number) =>
