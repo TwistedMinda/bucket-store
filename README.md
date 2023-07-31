@@ -260,8 +260,8 @@ const Compo = ({ id }: { id: string }) => {
   const loadingMore = countersBucket(id).useLoadingMore()
   ...
   
-  const  renderCounter  = (item:  Counter, index:  number) =>
-    <CounterItem  key={index}  counter={item}  />
+  const renderCounter = (item: Counter, index: number) =>
+    <CounterItem key={index} counter={item} />
   
   return (
     <FlatList
