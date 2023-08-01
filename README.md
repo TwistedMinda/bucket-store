@@ -136,6 +136,10 @@ interface FetcherBucketConfig<T> extends BucketConfig<T> {
 }
 ```
 
+Simply create your buckets and you're good to go.
+
+*Note that `path` is automatically used as unique key by the keyed helper (still possible to give your own key for edge cases)*
+
 ```ts
 interface CounterResponse {
   count: number
@@ -150,7 +154,7 @@ const counterBucket = new FetcherBucket<CounterResponse>({
 // Keyed fetcher
 const counterBucket = (id: string) =>
   keyedFetcherBucket<CounterResponse>({
-    path: `/users/${id}/counter`,
+    path: `/users/${id}/counter`, // used as "unique key"
     defaultValue: { count: 0 }
   })
 ```
@@ -189,7 +193,7 @@ const updateCounterBucket = new MutatorBucket<UpdateCounterParams>({
 // Keyed Mutator
 const updateCounterBucket = (id: string) =>
   keyedMutatorBucket<UpdateCounterParams, UpdateCounterResponse>({
-    path: `/users/${id}/counter`,
+    path: `/users/${id}/counter`, // used as "unique key"
   })
 ```
 
