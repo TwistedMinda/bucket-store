@@ -105,7 +105,7 @@ const Compo = ({ id }: { id: string }) => {
 
 **Keyed buckets**
 
-Often times we need multiple instances of a bucket given parameters. For the base buckets, there are helpers `keyed[BucketType]Buckets` to easily get a singleton.
+Often times we need multiple instances of a bucket given parameters. For the base buckets, there are helpers `keyed[BucketType]Bucket` to easily get a singleton.
 
 ```ts
 const counterBucket = (id: string) =>
@@ -125,7 +125,8 @@ const counterBucket = (id: string) =>
 
 ## Fetcher Buckets (Custom)
 
-Custom Bucket to fetch data and automatically fill the bucket value with it (can be disabled using `sideEffect` config)
+Custom Bucket to fetch data
+- by default, it automatically fills the value with the request response (use `sideEffect` to override behavior)
 
 ```ts
 interface FetcherBucketConfig<T> extends BucketConfig<T> {
@@ -158,6 +159,7 @@ Usage:
 ```ts
 const Compo = ({ id }: { id: string }) => {
   // With `useQuery` candy
+  // will trigger a request on mount
   const { data: counter, loading, error, refetch } =
     counterBucket(id).useQuery()
   
@@ -196,13 +198,21 @@ Usage:
 ```ts
 const Compo = ({ id }: { id: string }) => {
   // With `useQuery` candy
-  // will not trigger mutator on mount for mutators
+  // will NOT trigger a request on mount for mutators
   const { data: response, loading, error, refetch } =
-    updateCounterBucket(id).useQuery() 
+    updateCounterBucket(id).useQuery()
+  
+  updateCounter = async (newCount: number) => {
+    await refetch({
+      newCount
+    })
+  }
 
   // Without `useQuery`
+  const loading = updateCounterBucket(id).useLoading()
+  const refetch = updateCounterBucket(id).useMutate()
   updateCounter = async (newCount: number) => {
-    const { lastUpdatedAt } = await updateCounterBucket(id).mutate({
+    const { lastUpdatedAt } = await refetch(id).mutate({
       newCount
     })
   }
@@ -225,7 +235,8 @@ interface PaginatedFetcherBucketConfig<T> extends FetcherBucketConfig<T> {
 }
 ```
 
-Simply create your buckets and you're good to go
+Simply create your buckets and you're good to go.
+
 *Note that `path` is automatically used as unique key by the keyed helper (still possible to give your own key for edge cases)*
 
 ```ts
@@ -257,6 +268,7 @@ const countersBucket = (id: string, color: string) =>
   }, `user-counters-${id}-${color}`)  // Must provide a "unique key" as "path" doesn't exist
 
 ```
+
 Usage example
 
 ```jsx
