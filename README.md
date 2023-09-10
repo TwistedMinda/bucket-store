@@ -1,6 +1,6 @@
 
-
 # Why
+
 The idea is to propose a set of entreprise-ready standards for the most common required tools for building an app: fetching data, storing it, persisting it, and get types for all of it
 
 - ✅ Compact, No boiler-plate
