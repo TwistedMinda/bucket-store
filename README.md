@@ -302,3 +302,5 @@ const Compo = ({ id }: { id: string }) => {
   )
 }
 ```
+
+Don't hesitate to create an issue to start a discussion on the topic.
